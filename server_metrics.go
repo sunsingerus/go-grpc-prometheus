@@ -25,30 +25,48 @@ type ServerMetrics struct {
 // example when wanting to control which metrics are added to a registry as
 // opposed to automatically adding metrics via init functions.
 func NewServerMetrics(counterOpts ...CounterOption) *ServerMetrics {
+	return NewServerMetricsNamed("", "", counterOpts...)
+}
+
+// NewServerMetricsNamed returns a ServerMetrics object. Use a new instance of
+// ServerMetrics when not using the default Prometheus metrics registry, for
+// example when wanting to control which metrics are added to a registry as
+// opposed to automatically adding metrics via init functions.
+func NewServerMetricsNamed(namespace, subsystem string, counterOpts ...CounterOption) *ServerMetrics {
 	opts := counterOptions(counterOpts)
 	return &ServerMetrics{
 		serverStartedCounter: prom.NewCounterVec(
 			opts.apply(prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
 				Name: "grpc_server_started_total",
 				Help: "Total number of RPCs started on the server.",
 			}), []string{"grpc_type", "grpc_service", "grpc_method"}),
 		serverHandledCounter: prom.NewCounterVec(
 			opts.apply(prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
 				Name: "grpc_server_handled_total",
 				Help: "Total number of RPCs completed on the server, regardless of success or failure.",
 			}), []string{"grpc_type", "grpc_service", "grpc_method", "grpc_code"}),
 		serverStreamMsgReceived: prom.NewCounterVec(
 			opts.apply(prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
 				Name: "grpc_server_msg_received_total",
 				Help: "Total number of RPC stream messages received on the server.",
 			}), []string{"grpc_type", "grpc_service", "grpc_method"}),
 		serverStreamMsgSent: prom.NewCounterVec(
 			opts.apply(prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
 				Name: "grpc_server_msg_sent_total",
 				Help: "Total number of gRPC stream messages sent by the server.",
 			}), []string{"grpc_type", "grpc_service", "grpc_method"}),
 		serverHandledHistogramEnabled: false,
 		serverHandledHistogramOpts: prom.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
 			Name:    "grpc_server_handling_seconds",
 			Help:    "Histogram of response latency (seconds) of gRPC that had been application-level handled by the server.",
 			Buckets: prom.DefBuckets,
